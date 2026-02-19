@@ -6,6 +6,7 @@ import { TimeSlotGrid } from '@/components/app/TimeSlotGrid';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type Service = {
   id: string;
@@ -170,20 +171,26 @@ export default function PublicBookingPage({
       <Card className="space-y-6 p-5 sm:p-6">
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">1) Service</h2>
-          <select
-            className="w-full rounded-xl border border-white/15 bg-white/5 p-3"
-            value={serviceId}
-            onChange={(e) => setServiceId(e.target.value)}
-            disabled={loadingServices || services.length === 0}
-          >
-            {loadingServices ? <option>Loading services...</option> : null}
-            {!loadingServices && services.length === 0 ? <option>No services available</option> : null}
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} · {s.duration_minutes} min
-              </option>
-            ))}
-          </select>
+          <Select value={serviceId} onValueChange={setServiceId} disabled={loadingServices || services.length === 0}>
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  loadingServices
+                    ? 'Loading services...'
+                    : services.length === 0
+                      ? 'No services available'
+                      : 'Select a service'
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {services.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name} · {s.duration_minutes} min
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </section>
 
         <section className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">

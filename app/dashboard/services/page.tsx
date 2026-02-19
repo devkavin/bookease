@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/app/EmptyState';
+import { formatCurrency } from '@/lib/currency';
 
 type Service = {
   id: string;
@@ -43,7 +44,7 @@ export default function ServicesPage() {
 
       const { data, error } = await supabase
         .from('businesses')
-        .select('id')
+        .select('id,system_currency')
         .eq('owner_id', user.id)
         .single();
 
@@ -190,7 +191,7 @@ export default function ServicesPage() {
         </Card>
         <Card className="space-y-1 p-4">
           <p className="text-sm text-white/70">Average price</p>
-          <p className="text-2xl font-semibold">${averagePrice.toFixed(2)}</p>
+          <p className="text-2xl font-semibold">{formatCurrency(averagePrice, business.data?.system_currency ?? 'USD')}</p>
         </Card>
       </div>
 
@@ -285,7 +286,10 @@ export default function ServicesPage() {
                 <div>
                   <p className="font-medium">{service.name}</p>
                   <p className="text-xs text-white/60">
-                    {service.duration_minutes} min · ${(service.price_cents / 100).toFixed(2)}
+                    {service.duration_minutes} min · {formatCurrency(
+                      service.price_cents / 100,
+                      business.data?.system_currency ?? 'USD'
+                    )}
                   </p>
                 </div>
                 <Button

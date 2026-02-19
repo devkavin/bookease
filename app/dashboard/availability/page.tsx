@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/browser';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 
 const weekdays = [
   { value: 0, label: 'Sunday' },
@@ -321,10 +322,10 @@ export default function AvailabilityPage() {
         <h2 className="text-lg font-semibold">Date exceptions</h2>
 
         <div className="grid gap-2 sm:grid-cols-4">
-          <Input
-            type="date"
+          <DatePicker
             value={exceptionDraft.date}
-            onChange={(e) => setExceptionDraft((prev) => ({ ...prev, date: e.target.value }))}
+            onChange={(date) => setExceptionDraft((prev) => ({ ...prev, date }))}
+            placeholder="Select exception date"
           />
           <Button
             variant={exceptionDraft.is_closed ? 'default' : 'outline'}

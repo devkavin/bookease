@@ -15,13 +15,13 @@ export function Calendar({ className, classNames, showOutsideDays = false, ...pr
       classNames={{
         months: 'flex flex-col gap-3',
         month: 'space-y-3',
-        caption: 'relative flex items-center justify-center pt-1',
+        caption: 'flex items-center justify-between gap-2 pt-1',
         caption_label: 'text-sm font-semibold text-white',
         nav: 'flex items-center gap-1',
         button_previous:
-          'absolute left-1 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-white hover:bg-white/10',
+          'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-white hover:bg-white/10',
         button_next:
-          'absolute right-1 inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-white hover:bg-white/10',
+          'inline-flex h-8 w-8 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-white hover:bg-white/10',
         month_grid: 'w-full border-collapse',
         weekdays: 'grid grid-cols-7 gap-1',
         weekday: 'h-9 w-9 text-center text-xs font-medium leading-9 text-white/60',

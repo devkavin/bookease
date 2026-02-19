@@ -17,10 +17,10 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#040711]/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-[#120a1f]/65 backdrop-blur-xl">
       <nav className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="group flex items-center gap-2 text-lg font-semibold tracking-tight">
-          <span className="rounded-lg border border-sky-300/30 bg-sky-500/15 p-1.5 text-sky-200 transition group-hover:bg-sky-500/30">
+          <span className="rounded-lg border border-amber-200/35 bg-amber-300/15 p-1.5 text-amber-100 transition group-hover:bg-amber-300/30">
             <Sparkles className="h-4 w-4" />
           </span>
           BookEase
@@ -46,7 +46,7 @@ export function Navbar() {
 
         <div className="hidden md:flex">
           <Link href="/auth/sign-up">
-            <Button className="shadow-[0_8px_24px_rgba(56,189,248,0.28)]">Start free</Button>
+            <Button className="shadow-[0_10px_28px_rgba(217,119,6,0.28)]">Start free</Button>
           </Link>
         </div>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Clock3, Plus, Search, Sparkles, Trash2, WandSparkles } from 'lucide-react';
 import { toast } from 'sonner';
@@ -32,6 +32,8 @@ export default function ServicesPage() {
   const [duration, setDuration] = useState('30');
   const [price, setPrice] = useState('0');
   const [query, setQuery] = useState('');
+  const currencySymbolRef = useRef<HTMLSpanElement | null>(null);
+  const [currencySymbolWidth, setCurrencySymbolWidth] = useState(0);
 
   const business = useQuery({
     queryKey: ['my-business'],
@@ -55,6 +57,22 @@ export default function ServicesPage() {
 
   const currencyCode = business.data?.system_currency ?? 'USD';
   const currencySymbol = getCurrencySymbol(currencyCode);
+  const priceInputPaddingLeft = `${currencySymbolWidth + 20}px`;
+
+  useEffect(() => {
+    if (!currencySymbolRef.current) return;
+
+    const updateWidth = () => {
+      setCurrencySymbolWidth(currencySymbolRef.current?.offsetWidth ?? 0);
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(currencySymbolRef.current);
+
+    return () => observer.disconnect();
+  }, [currencySymbol]);
 
   const services = useQuery({
     queryKey: ['services', business.data?.id],
@@ -222,7 +240,9 @@ export default function ServicesPage() {
             />
           </div>
           <div className="relative">
-            <span className="pointer-events-none absolute left-3 top-2.5 text-sm text-white/50">{currencySymbol}</span>
+            <span ref={currencySymbolRef} className="pointer-events-none absolute left-3 top-2.5 text-sm text-white/50">
+              {currencySymbol}
+            </span>
             <Input
               type="number"
               min={0}
@@ -230,7 +250,7 @@ export default function ServicesPage() {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Price"
-              className="pl-9"
+              style={{ paddingLeft: priceInputPaddingLeft }}
             />
           </div>
           <Button onClick={submitNewService} disabled={!business.data?.id || create.isPending}>

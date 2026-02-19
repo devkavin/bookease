@@ -20,7 +20,11 @@ export async function GET(request: Request) {
   const slug = new URL(request.url).searchParams.get('slug');
   if (!slug) return NextResponse.json({ services: [] });
 
-  const { data: business } = await supabase.from('businesses').select('id').eq('slug', slug).maybeSingle();
+  const { data: business } = await supabase
+    .from('businesses')
+    .select('id,system_currency')
+    .eq('slug', slug)
+    .maybeSingle();
   if (!business) return NextResponse.json({ services: [] });
 
   const { data: services } = await supabase
@@ -30,7 +34,7 @@ export async function GET(request: Request) {
     .eq('is_active', true)
     .order('created_at');
 
-  return NextResponse.json({ services: services ?? [] });
+  return NextResponse.json({ services: services ?? [], system_currency: business.system_currency ?? 'USD' });
 }
 
 export async function POST(request: Request) {

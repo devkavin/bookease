@@ -4,6 +4,7 @@ import { use, useEffect, useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { BookingCalendar } from '@/components/app/BookingCalendar';
 import { TimeSlotGrid } from '@/components/app/TimeSlotGrid';
+import { formatCurrency } from '@/lib/currency';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +14,7 @@ type Service = {
   id: string;
   name: string;
   duration_minutes: number;
+  price_cents: number;
 };
 
 function getTodayKey() {
@@ -30,6 +32,7 @@ export default function PublicBookingPage({
 }) {
   const { slug } = use(params);
   const [services, setServices] = useState<Service[]>([]);
+  const [systemCurrency, setSystemCurrency] = useState('USD');
   const [serviceId, setServiceId] = useState('');
   const [date, setDate] = useState(getTodayKey());
   const [slots, setSlots] = useState<{ label: string; startISO: string }[]>([]);
@@ -63,6 +66,7 @@ export default function PublicBookingPage({
 
         const loaded = (data.services ?? []) as Service[];
         setServices(loaded);
+        setSystemCurrency(data.system_currency ?? 'USD');
         setServiceId(loaded[0]?.id ?? '');
       } catch {
         setServices([]);
@@ -219,7 +223,7 @@ export default function PublicBookingPage({
             <SelectContent>
               {services.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
-                  {s.name} · {s.duration_minutes} min
+                  {s.name} · {s.duration_minutes} min · {formatCurrency(s.price_cents / 100, systemCurrency)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -241,7 +245,12 @@ export default function PublicBookingPage({
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">Time slots</h2>
             <p className="text-xs text-white/60">
-              {selectedService ? `${selectedService.duration_minutes}-minute appointment` : 'Select a service'}
+              {selectedService
+                ? `${selectedService.duration_minutes}-minute appointment · ${formatCurrency(
+                    selectedService.price_cents / 100,
+                    systemCurrency
+                  )}`
+                : 'Select a service'}
             </p>
             <p className="text-xs text-white/50">Choose a time from the segmented picker for a faster selection flow.</p>
             {loadingSlots ? <p className="text-xs text-white/70">Loading time slots...</p> : null}

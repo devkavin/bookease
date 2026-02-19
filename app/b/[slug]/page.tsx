@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { BookingCalendar } from '@/components/app/BookingCalendar';
 import { TimeSlotGrid } from '@/components/app/TimeSlotGrid';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,12 @@ function getTodayKey() {
   return `${y}-${m}-${d}`;
 }
 
-export default function PublicBookingPage({ params }: { params: { slug: string } }) {
+export default function PublicBookingPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = use(params);
   const [services, setServices] = useState<Service[]>([]);
   const [serviceId, setServiceId] = useState('');
   const [date, setDate] = useState(getTodayKey());
@@ -31,6 +36,8 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [loadingServices, setLoadingServices] = useState(true);
+  const [loadingSlots, setLoadingSlots] = useState(false);
   const [error, setError] = useState('');
 
   const selectedService = useMemo(
@@ -39,23 +46,59 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
   );
 
   useEffect(() => {
-    fetch(`/api/bookings?slug=${params.slug}`)
-      .then((r) => r.json())
-      .then((d) => {
-        const loaded = (d.services ?? []) as Service[];
+    async function loadServices() {
+      setError('');
+      setLoadingServices(true);
+
+      try {
+        const res = await fetch(`/api/bookings?slug=${encodeURIComponent(slug)}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error('Unable to load services right now.');
+        }
+
+        const loaded = (data.services ?? []) as Service[];
         setServices(loaded);
-        if (loaded[0]) setServiceId(loaded[0].id);
-      });
-  }, [params.slug]);
+        setServiceId(loaded[0]?.id ?? '');
+      } catch {
+        setServices([]);
+        setServiceId('');
+        setError('Services are currently unavailable. Please try again shortly.');
+      } finally {
+        setLoadingServices(false);
+      }
+    }
+
+    loadServices();
+  }, [slug]);
 
   useEffect(() => {
-    if (!serviceId) return;
-    setSelectedSlot('');
-    setStartTime('');
-    fetch(`/api/availability?slug=${params.slug}&serviceId=${serviceId}&date=${date}`)
-      .then((r) => r.json())
-      .then((d) => setSlots(d.slots ?? []));
-  }, [serviceId, date, params.slug]);
+    async function loadSlots() {
+      if (!serviceId) {
+        setSlots([]);
+        return;
+      }
+
+      setSelectedSlot('');
+      setStartTime('');
+      setLoadingSlots(true);
+
+      try {
+        const res = await fetch(
+          `/api/availability?slug=${encodeURIComponent(slug)}&serviceId=${serviceId}&date=${date}`
+        );
+        const data = await res.json();
+        setSlots(data.slots ?? []);
+      } catch {
+        setSlots([]);
+      } finally {
+        setLoadingSlots(false);
+      }
+    }
+
+    loadSlots();
+  }, [serviceId, date, slug]);
 
   async function confirm() {
     setSubmitting(true);
@@ -64,7 +107,7 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        slug: params.slug,
+        slug: slug,
         serviceId,
         date,
         startTime,
@@ -81,7 +124,7 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
     }
 
     if (json.bookingId) {
-      window.location.href = `/b/${params.slug}/confirmed?bookingId=${json.bookingId}`;
+      window.location.href = `/b/${slug}/confirmed?bookingId=${json.bookingId}`;
     }
   }
 
@@ -120,7 +163,12 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
             className="w-full rounded-xl border border-white/15 bg-white/5 p-3"
             value={serviceId}
             onChange={(e) => setServiceId(e.target.value)}
+            disabled={loadingServices || services.length === 0}
           >
+            {loadingServices ? <option>Loading services...</option> : null}
+            {!loadingServices && services.length === 0 ? (
+              <option>No services available</option>
+            ) : null}
             {services.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} · {s.duration_minutes} min
@@ -142,6 +190,7 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
                 ? `${selectedService.duration_minutes}-minute appointment`
                 : 'Select a service'}
             </p>
+            {loadingSlots ? <p className="text-xs text-white/70">Loading time slots...</p> : null}
             <TimeSlotGrid
               slots={slots}
               value={selectedSlot}
@@ -172,7 +221,10 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
 
         {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
-        <Button onClick={confirm} disabled={!startTime || !name || !email || submitting}>
+        <Button
+          onClick={confirm}
+          disabled={!serviceId || !startTime || !name || !email || submitting || loadingServices}
+        >
           {submitting ? 'Confirming…' : 'Confirm booking'}
         </Button>
       </Card>

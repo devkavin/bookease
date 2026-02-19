@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { bookingSchema } from '@/lib/validators/booking';
-import { createClient as createAnon } from '@/lib/supabase/server';
 import { createClient as createAdmin, SupabaseClient } from '@supabase/supabase-js';
 import { fromZonedTime } from 'date-fns-tz';
 import { addMinutes } from 'date-fns';
@@ -12,7 +11,7 @@ function adminClient(): SupabaseClient {
 }
 
 export async function GET(request: Request) {
-  const supabase = await createAnon();
+  const supabase = adminClient();
   const slug = new URL(request.url).searchParams.get('slug');
   if (!slug) return NextResponse.json({ services: [] });
   const { data: business } = await supabase.from('businesses').select('id').eq('slug', slug).single();

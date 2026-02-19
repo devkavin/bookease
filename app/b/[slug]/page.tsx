@@ -24,8 +24,11 @@ function getTodayKey() {
 export default function PublicBookingPage({ params }: { params: { slug: string } }) {
   const [services, setServices] = useState<Service[]>([]);
   const [serviceId, setServiceId] = useState('');
+  const [servicesLoading, setServicesLoading] = useState(true);
+  const [servicesError, setServicesError] = useState('');
   const [date, setDate] = useState(getTodayKey());
   const [slots, setSlots] = useState<{ label: string; startISO: string }[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
   const [startTime, setStartTime] = useState('');
   const [selectedSlot, setSelectedSlot] = useState('');
   const [name, setName] = useState('');
@@ -39,22 +42,45 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
   );
 
   useEffect(() => {
-    fetch(`/api/bookings?slug=${params.slug}`)
-      .then((r) => r.json())
-      .then((d) => {
+    async function loadServices() {
+      setServicesLoading(true);
+      setServicesError('');
+      try {
+        const res = await fetch(`/api/bookings?slug=${encodeURIComponent(params.slug)}`);
+        const d = await res.json();
+        if (!res.ok) {
+          setServicesError(d.error ?? 'Unable to load services right now.');
+          return;
+        }
         const loaded = (d.services ?? []) as Service[];
         setServices(loaded);
         if (loaded[0]) setServiceId(loaded[0].id);
-      });
+      } catch {
+        setServicesError('Unable to load services right now.');
+      } finally {
+        setServicesLoading(false);
+      }
+    }
+
+    loadServices();
   }, [params.slug]);
 
   useEffect(() => {
     if (!serviceId) return;
-    setSelectedSlot('');
-    setStartTime('');
-    fetch(`/api/availability?slug=${params.slug}&serviceId=${serviceId}&date=${date}`)
-      .then((r) => r.json())
-      .then((d) => setSlots(d.slots ?? []));
+
+    async function loadSlots() {
+      setSlotsLoading(true);
+      setSelectedSlot('');
+      setStartTime('');
+      const res = await fetch(
+        `/api/availability?slug=${encodeURIComponent(params.slug)}&serviceId=${serviceId}&date=${date}`
+      );
+      const d = await res.json();
+      setSlots(d.slots ?? []);
+      setSlotsLoading(false);
+    }
+
+    loadSlots();
   }, [serviceId, date, params.slug]);
 
   async function confirm() {
@@ -116,11 +142,15 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
       <Card className="space-y-6 p-5 sm:p-6">
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">1) Service</h2>
+          {servicesLoading ? <p className="text-sm text-white/60">Loading services…</p> : null}
+          {servicesError ? <p className="text-sm text-rose-300">{servicesError}</p> : null}
           <select
             className="w-full rounded-xl border border-white/15 bg-white/5 p-3"
             value={serviceId}
             onChange={(e) => setServiceId(e.target.value)}
+            disabled={servicesLoading || services.length === 0}
           >
+            {services.length === 0 ? <option value="">No services available</option> : null}
             {services.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} · {s.duration_minutes} min
@@ -142,6 +172,7 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
                 ? `${selectedService.duration_minutes}-minute appointment`
                 : 'Select a service'}
             </p>
+            {slotsLoading ? <p className="text-xs text-white/60">Loading available times…</p> : null}
             <TimeSlotGrid
               slots={slots}
               value={selectedSlot}
@@ -172,7 +203,7 @@ export default function PublicBookingPage({ params }: { params: { slug: string }
 
         {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
-        <Button onClick={confirm} disabled={!startTime || !name || !email || submitting}>
+        <Button onClick={confirm} disabled={!startTime || !name || !email || submitting || !serviceId}>
           {submitting ? 'Confirming…' : 'Confirm booking'}
         </Button>
       </Card>

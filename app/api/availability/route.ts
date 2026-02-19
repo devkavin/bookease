@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { availabilityQuerySchema } from '@/lib/validators/availability';
 import { generateSlots } from '@/lib/slots/generateSlots';
-import { createClient as createServer } from '@/lib/supabase/server';
+import { createClient as createAdmin } from '@supabase/supabase-js';
+
+function adminClient() {
+  return createAdmin(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+}
 
 export async function GET(request: Request) {
-  const supabase = await createServer();
+  const supabase = adminClient();
   const { searchParams } = new URL(request.url);
   const parsed = availabilityQuerySchema.safeParse(Object.fromEntries(searchParams.entries()));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });

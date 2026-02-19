@@ -277,8 +277,11 @@ export default function AvailabilityPage() {
             const draft = dayDrafts[day.value];
 
             return (
-              <div key={day.value} className="grid gap-2 rounded-xl border border-white/10 p-3 sm:grid-cols-[140px_120px_120px_1fr] sm:items-center">
-                <p className="text-sm font-medium">{day.label}</p>
+              <div
+                key={day.value}
+                className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:grid-cols-[140px_130px_1fr] sm:items-center sm:gap-4"
+              >
+                <p className="text-sm font-medium tracking-[0.01em]">{day.label}</p>
                 <Button
                   variant={draft.enabled ? 'default' : 'outline'}
                   onClick={() =>
@@ -287,31 +290,43 @@ export default function AvailabilityPage() {
                       [day.value]: { ...prev[day.value], enabled: !prev[day.value].enabled },
                     }))
                   }
+                  className="w-full sm:w-auto"
                 >
                   {draft.enabled ? 'Open' : 'Closed'}
                 </Button>
-                <Input
-                  type="time"
-                  value={draft.start}
-                  disabled={!draft.enabled}
-                  onChange={(e) =>
-                    setDayDrafts((prev) => ({
-                      ...prev,
-                      [day.value]: { ...prev[day.value], start: e.target.value },
-                    }))
-                  }
-                />
-                <Input
-                  type="time"
-                  value={draft.end}
-                  disabled={!draft.enabled}
-                  onChange={(e) =>
-                    setDayDrafts((prev) => ({
-                      ...prev,
-                      [day.value]: { ...prev[day.value], end: e.target.value },
-                    }))
-                  }
-                />
+                <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-[0.14em] text-white/55">Opens</p>
+                    <Input
+                      type="time"
+                      value={draft.start}
+                      disabled={!draft.enabled}
+                      onChange={(e) =>
+                        setDayDrafts((prev) => ({
+                          ...prev,
+                          [day.value]: { ...prev[day.value], start: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                  <span className="hidden px-1 text-center text-xs font-medium uppercase tracking-[0.14em] text-white/45 sm:block">
+                    to
+                  </span>
+                  <div className="space-y-1">
+                    <p className="text-xs uppercase tracking-[0.14em] text-white/55">Closes</p>
+                    <Input
+                      type="time"
+                      value={draft.end}
+                      disabled={!draft.enabled}
+                      onChange={(e) =>
+                        setDayDrafts((prev) => ({
+                          ...prev,
+                          [day.value]: { ...prev[day.value], end: e.target.value },
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -321,7 +336,7 @@ export default function AvailabilityPage() {
       <Card className="space-y-4 p-4 sm:p-6">
         <h2 className="text-lg font-semibold">Date exceptions</h2>
 
-        <div className="grid gap-2 sm:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-4 sm:items-end">
           <DatePicker
             value={exceptionDraft.date}
             onChange={(date) => setExceptionDraft((prev) => ({ ...prev, date }))}
@@ -337,12 +352,14 @@ export default function AvailabilityPage() {
             type="time"
             value={exceptionDraft.start_time}
             disabled={exceptionDraft.is_closed}
+            aria-label="Exception start time"
             onChange={(e) => setExceptionDraft((prev) => ({ ...prev, start_time: e.target.value }))}
           />
           <Input
             type="time"
             value={exceptionDraft.end_time}
             disabled={exceptionDraft.is_closed}
+            aria-label="Exception end time"
             onChange={(e) => setExceptionDraft((prev) => ({ ...prev, end_time: e.target.value }))}
           />
         </div>

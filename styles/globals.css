@@ -84,12 +84,47 @@ body {
   position: relative;
 }
 
+.trust-marquee::before,
+.trust-marquee::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3.5rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.trust-marquee::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(5, 3, 10, 0.92), rgba(5, 3, 10, 0));
+}
+
+.trust-marquee::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(5, 3, 10, 0.92), rgba(5, 3, 10, 0));
+}
+
+.trust-marquee__rail {
+  position: relative;
+  min-height: 2.2rem;
+}
+
 .trust-marquee__track {
+  position: absolute;
+  inset: 0 auto 0 0;
   display: flex;
   gap: 1rem;
   width: max-content;
-  animation: marquee 24s linear infinite;
-  padding-inline: 1rem;
+  will-change: transform;
+}
+
+.trust-marquee__track--a {
+  animation: marquee-a 24s linear infinite;
+}
+
+.trust-marquee__track--b {
+  animation: marquee-b 24s linear infinite;
 }
 
 .trust-marquee__item {
@@ -103,12 +138,21 @@ body {
   white-space: nowrap;
 }
 
-@keyframes marquee {
+@keyframes marquee-a {
   from {
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-50%, 0, 0);
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes marquee-b {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
   }
 }
 

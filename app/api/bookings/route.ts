@@ -36,7 +36,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const parsed = bookingSchema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-  const { slug, serviceId, date, startTime, customer_name, customer_email, note } = parsed.data;
+
+  const { slug, serviceId, date, startTime, customer_name, customer_email, customer_phone, note } = parsed.data;
   const supabase = adminClient();
 
   if (!supabase) {
@@ -48,26 +49,30 @@ export async function POST(request: Request) {
 
   const { data: business } = await supabase.from('businesses').select('*').eq('slug', slug).single();
   if (!business) return NextResponse.json({ error: 'Business not found' }, { status: 404 });
+
   const { data: service } = await supabase
     .from('services')
     .select('*')
     .eq('id', serviceId)
     .eq('business_id', business.id)
     .single();
+
   if (!service) return NextResponse.json({ error: 'Service not found' }, { status: 404 });
 
   const start_at = fromZonedTime(`${date}T${startTime}:00`, business.timezone);
   const end_at = addMinutes(start_at, service.duration_minutes);
+
   const { data: overlapping } = await supabase
     .from('bookings')
     .select('start_at,end_at')
     .eq('business_id', business.id)
+    .eq('service_id', service.id)
     .eq('status', 'confirmed')
     .lt('start_at', end_at.toISOString())
     .gt('end_at', start_at.toISOString());
 
   if ((overlapping ?? []).some((b) => overlaps(start_at, end_at, new Date(b.start_at), new Date(b.end_at)))) {
-    return NextResponse.json({ error: 'Slot already booked' }, { status: 409 });
+    return NextResponse.json({ error: 'This time slot is already booked for the selected service.' }, { status: 409 });
   }
 
   const { data: booking, error } = await supabase
@@ -77,6 +82,7 @@ export async function POST(request: Request) {
       service_id: service.id,
       customer_name,
       customer_email,
+      customer_phone,
       start_at: start_at.toISOString(),
       end_at: end_at.toISOString(),
       status: 'confirmed',
@@ -85,7 +91,13 @@ export async function POST(request: Request) {
     .select('*')
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    const isUniqueViolation = error.code === '23505';
+    return NextResponse.json(
+      { error: isUniqueViolation ? 'This time slot is no longer available. Please choose another one.' : error.message },
+      { status: isUniqueViolation ? 409 : 400 }
+    );
+  }
 
   await sendBookingEmail({
     to: customer_email,

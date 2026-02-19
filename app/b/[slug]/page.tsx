@@ -35,15 +35,13 @@ export default function PublicBookingPage({
   const [selectedSlot, setSelectedSlot] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [loadingServices, setLoadingServices] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [error, setError] = useState('');
 
-  const selectedService = useMemo(
-    () => services.find((s) => s.id === serviceId),
-    [serviceId, services]
-  );
+  const selectedService = useMemo(() => services.find((s) => s.id === serviceId), [serviceId, services]);
 
   useEffect(() => {
     async function loadServices() {
@@ -77,21 +75,30 @@ export default function PublicBookingPage({
     async function loadSlots() {
       if (!serviceId) {
         setSlots([]);
+        setStartTime('');
+        setSelectedSlot('');
         return;
       }
 
-      setSelectedSlot('');
-      setStartTime('');
       setLoadingSlots(true);
+      setError('');
 
       try {
         const res = await fetch(
           `/api/availability?slug=${encodeURIComponent(slug)}&serviceId=${serviceId}&date=${date}`
         );
         const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error('Unable to load availability right now.');
+        }
+
         setSlots(data.slots ?? []);
+        setStartTime('');
+        setSelectedSlot('');
       } catch {
         setSlots([]);
+        setError('Could not fetch available time slots. Please try a different date.');
       } finally {
         setLoadingSlots(false);
       }
@@ -101,25 +108,29 @@ export default function PublicBookingPage({
   }, [serviceId, date, slug]);
 
   async function confirm() {
+    if (!serviceId || !startTime || !name || !email || !phone) return;
+
     setSubmitting(true);
     setError('');
+
     const res = await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        slug: slug,
+        slug,
         serviceId,
         date,
         startTime,
         customer_name: name,
         customer_email: email,
+        customer_phone: phone,
       }),
     });
     const json = await res.json();
     setSubmitting(false);
 
     if (!res.ok) {
-      setError(json.error ?? 'Unable to confirm your booking. Please try again.');
+      setError(typeof json.error === 'string' ? json.error : 'Unable to confirm your booking. Please try again.');
       return;
     }
 
@@ -131,7 +142,7 @@ export default function PublicBookingPage({
   const steps = [
     { title: 'Choose service', done: Boolean(serviceId) },
     { title: 'Pick date & time', done: Boolean(startTime) },
-    { title: 'Your details', done: Boolean(name && email) },
+    { title: 'Your details', done: Boolean(name && email && phone) },
   ];
 
   return (
@@ -166,9 +177,7 @@ export default function PublicBookingPage({
             disabled={loadingServices || services.length === 0}
           >
             {loadingServices ? <option>Loading services...</option> : null}
-            {!loadingServices && services.length === 0 ? (
-              <option>No services available</option>
-            ) : null}
+            {!loadingServices && services.length === 0 ? <option>No services available</option> : null}
             {services.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name} · {s.duration_minutes} min
@@ -186,9 +195,7 @@ export default function PublicBookingPage({
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">Time slots</h2>
             <p className="text-xs text-white/60">
-              {selectedService
-                ? `${selectedService.duration_minutes}-minute appointment`
-                : 'Select a service'}
+              {selectedService ? `${selectedService.duration_minutes}-minute appointment` : 'Select a service'}
             </p>
             {loadingSlots ? <p className="text-xs text-white/70">Loading time slots...</p> : null}
             <TimeSlotGrid
@@ -205,25 +212,25 @@ export default function PublicBookingPage({
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">3) Your details</h2>
           <div className="grid gap-3 sm:grid-cols-2">
+            <Input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input placeholder="Your email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             <Input
-              placeholder="Your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <Input
-              placeholder="Your email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Contact number (+14155552671)"
+              type="tel"
+              inputMode="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="sm:col-span-2"
             />
           </div>
+          <p className="text-xs text-white/60">Include country code to receive booking updates.</p>
         </section>
 
         {error ? <p className="text-sm text-rose-300">{error}</p> : null}
 
         <Button
           onClick={confirm}
-          disabled={!serviceId || !startTime || !name || !email || submitting || loadingServices}
+          disabled={!serviceId || !startTime || !name || !email || !phone || submitting || loadingServices}
         >
           {submitting ? 'Confirming…' : 'Confirm booking'}
         </Button>

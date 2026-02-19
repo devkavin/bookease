@@ -17,6 +17,10 @@ export default function OnboardingPage() {
     const supabase = createClient();
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return;
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({ id: user.user.id });
+    if (profileError) return alert(profileError.message);
     const { error } = await supabase.from('businesses').insert({ owner_id: user.user.id, ...values });
     if (error) return alert(error.message);
     window.location.href = '/dashboard/overview';

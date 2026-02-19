@@ -1,8 +1,15 @@
 'use client';
 
+import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 
 type Slot = { label: string; startISO: string };
+
+const slotGroups = [
+  { key: 'morning', title: 'Morning', startHour: 0, endHour: 12 },
+  { key: 'afternoon', title: 'Afternoon', startHour: 12, endHour: 17 },
+  { key: 'evening', title: 'Evening', startHour: 17, endHour: 24 },
+] as const;
 
 export function TimeSlotGrid({
   slots,
@@ -22,17 +29,33 @@ export function TimeSlotGrid({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-      {slots.map((slot) => (
-        <Button
-          key={slot.startISO}
-          variant={value === slot.startISO ? 'default' : 'outline'}
-          className="h-11"
-          onClick={() => onSelect(slot)}
-        >
-          {slot.label}
-        </Button>
-      ))}
+    <div className="space-y-3">
+      {slotGroups.map((group) => {
+        const sectionSlots = slots.filter((slot) => {
+          const hour = parseISO(slot.startISO).getHours();
+          return hour >= group.startHour && hour < group.endHour;
+        });
+
+        if (!sectionSlots.length) return null;
+
+        return (
+          <section key={group.key} className="space-y-2">
+            <h3 className="text-xs font-medium uppercase tracking-wide text-white/60">{group.title}</h3>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {sectionSlots.map((slot) => (
+                <Button
+                  key={slot.startISO}
+                  variant={value === slot.startISO ? 'default' : 'outline'}
+                  className="h-11"
+                  onClick={() => onSelect(slot)}
+                >
+                  {format(parseISO(slot.startISO), 'h:mm a')}
+                </Button>
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </div>
   );
 }

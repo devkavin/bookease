@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useEffect, useMemo, useState } from 'react';
+import { format } from 'date-fns';
 import { BookingCalendar } from '@/components/app/BookingCalendar';
 import { TimeSlotGrid } from '@/components/app/TimeSlotGrid';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,9 @@ export default function PublicBookingPage({
   const [loadingServices, setLoadingServices] = useState(true);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [error, setError] = useState('');
+  const [visibleMonth, setVisibleMonth] = useState(format(new Date(), 'yyyy-MM'));
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [closedDates, setClosedDates] = useState<string[]>([]);
 
   const selectedService = useMemo(() => services.find((s) => s.id === serviceId), [serviceId, services]);
 
@@ -107,6 +111,35 @@ export default function PublicBookingPage({
 
     loadSlots();
   }, [serviceId, date, slug]);
+
+  useEffect(() => {
+    async function loadCalendarSummary() {
+      if (!serviceId) {
+        setAvailableDates([]);
+        setClosedDates([]);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          `/api/availability/calendar?slug=${encodeURIComponent(slug)}&serviceId=${serviceId}&month=${visibleMonth}`
+        );
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error('Unable to load calendar availability.');
+        }
+
+        setAvailableDates(data.availableDates ?? []);
+        setClosedDates(data.closedDates ?? []);
+      } catch {
+        setAvailableDates([]);
+        setClosedDates([]);
+      }
+    }
+
+    loadCalendarSummary();
+  }, [serviceId, slug, visibleMonth]);
 
   async function confirm() {
     if (!serviceId || !startTime || !name || !email || !phone) return;
@@ -196,7 +229,13 @@ export default function PublicBookingPage({
         <section className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
           <div className="space-y-2">
             <h2 className="text-lg font-semibold">2) Date</h2>
-            <BookingCalendar value={date} onChange={setDate} />
+            <BookingCalendar
+              value={date}
+              onChange={setDate}
+              availableDates={availableDates}
+              closedDates={closedDates}
+              onMonthChange={setVisibleMonth}
+            />
           </div>
 
           <div className="space-y-2">

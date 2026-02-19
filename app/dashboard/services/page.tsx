@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock3, DollarSign, Plus, Search, Sparkles, Trash2, WandSparkles } from 'lucide-react';
+import { Clock3, Plus, Search, Sparkles, Trash2, WandSparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase/browser';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { EmptyState } from '@/components/app/EmptyState';
-import { formatCurrency } from '@/lib/currency';
+import { formatCurrency, getCurrencySymbol } from '@/lib/currency';
 
 type Service = {
   id: string;
@@ -52,6 +52,9 @@ export default function ServicesPage() {
       return data;
     },
   });
+
+  const currencyCode = business.data?.system_currency ?? 'USD';
+  const currencySymbol = getCurrencySymbol(currencyCode);
 
   const services = useQuery({
     queryKey: ['services', business.data?.id],
@@ -191,7 +194,7 @@ export default function ServicesPage() {
         </Card>
         <Card className="space-y-1 p-4">
           <p className="text-sm text-white/70">Average price</p>
-          <p className="text-2xl font-semibold">{formatCurrency(averagePrice, business.data?.system_currency ?? 'USD')}</p>
+          <p className="text-2xl font-semibold">{formatCurrency(averagePrice, currencyCode)}</p>
         </Card>
       </div>
 
@@ -219,7 +222,7 @@ export default function ServicesPage() {
             />
           </div>
           <div className="relative">
-            <DollarSign className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-white/50" />
+            <span className="pointer-events-none absolute left-3 top-2.5 text-sm text-white/50">{currencySymbol}</span>
             <Input
               type="number"
               min={0}
@@ -286,10 +289,7 @@ export default function ServicesPage() {
                 <div>
                   <p className="font-medium">{service.name}</p>
                   <p className="text-xs text-white/60">
-                    {service.duration_minutes} min · {formatCurrency(
-                      service.price_cents / 100,
-                      business.data?.system_currency ?? 'USD'
-                    )}
+                    {service.duration_minutes} min · {formatCurrency(service.price_cents / 100, currencyCode)}
                   </p>
                 </div>
                 <Button

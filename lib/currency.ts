@@ -21,3 +21,14 @@ export function formatCurrency(amount: number, currency: string) {
     maximumFractionDigits: 2,
   }).format(amount);
 }
+
+export function getCurrencySymbol(currency: string) {
+  const parts = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).formatToParts(0);
+
+  return parts.find((part) => part.type === 'currency')?.value ?? currency;
+}

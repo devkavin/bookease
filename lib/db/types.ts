@@ -21,4 +21,11 @@ export type Service = {
   is_active: boolean;
 };
 
-export type Business = { id: string; owner_id: string; name: string; slug: string; timezone: string };
+export type Business = {
+  id: string;
+  owner_id: string;
+  name: string;
+  slug: string;
+  timezone: string;
+  system_currency: string;
+};

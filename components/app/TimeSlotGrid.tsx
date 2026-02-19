@@ -29,7 +29,7 @@ export function TimeSlotGrid({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="max-h-[26rem] space-y-3 overflow-y-auto pr-1">
       {slotGroups.map((group) => {
         const sectionSlots = slots.filter((slot) => {
           const hour = parseISO(slot.startISO).getHours();
@@ -41,7 +41,7 @@ export function TimeSlotGrid({
         return (
           <section key={group.key} className="space-y-2">
             <h3 className="text-xs font-medium uppercase tracking-wide text-white/60">{group.title}</h3>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
               {sectionSlots.map((slot) => (
                 <Button
                   key={slot.startISO}

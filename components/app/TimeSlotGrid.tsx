@@ -1,7 +1,7 @@
 'use client';
 
 import { format, parseISO } from 'date-fns';
-import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 type Slot = { label: string; startISO: string };
 
@@ -39,20 +39,23 @@ export function TimeSlotGrid({
         if (!sectionSlots.length) return null;
 
         return (
-          <section key={group.key} className="space-y-2">
+          <section key={group.key} className="space-y-2 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
             <h3 className="text-xs font-medium uppercase tracking-wide text-white/60">{group.title}</h3>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-4">
+            <ToggleGroup
+              type="single"
+              value={value}
+              onValueChange={(nextValue) => {
+                if (!nextValue) return;
+                const slot = sectionSlots.find((item) => item.startISO === nextValue);
+                if (slot) onSelect(slot);
+              }}
+            >
               {sectionSlots.map((slot) => (
-                <Button
-                  key={slot.startISO}
-                  variant={value === slot.startISO ? 'default' : 'outline'}
-                  className="h-11"
-                  onClick={() => onSelect(slot)}
-                >
+                <ToggleGroupItem key={slot.startISO} value={slot.startISO} aria-label={`Choose ${slot.label}`}>
                   {format(parseISO(slot.startISO), 'h:mm a')}
-                </Button>
+                </ToggleGroupItem>
               ))}
-            </div>
+            </ToggleGroup>
           </section>
         );
       })}

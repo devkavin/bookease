@@ -243,7 +243,7 @@ export default function PublicBookingPage({
             <p className="text-xs text-white/60">
               {selectedService ? `${selectedService.duration_minutes}-minute appointment` : 'Select a service'}
             </p>
-            <p className="text-xs text-white/50">Showing a compact, scrollable list to keep the form on-screen.</p>
+            <p className="text-xs text-white/50">Choose a time from the segmented picker for a faster selection flow.</p>
             {loadingSlots ? <p className="text-xs text-white/70">Loading time slots...</p> : null}
             <TimeSlotGrid
               slots={slots}

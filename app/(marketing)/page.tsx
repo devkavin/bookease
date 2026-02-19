@@ -81,12 +81,21 @@ export default function MarketingPage() {
       </FadeIn>
 
       <section className="trust-marquee mt-2 border-y border-white/10 py-4">
-        <div className="trust-marquee__track">
-          {[...trustWords, ...trustWords].map((item, i) => (
-            <span key={`${item}-${i}`} className="trust-marquee__item">
-              {item}
-            </span>
-          ))}
+        <div className="trust-marquee__rail" aria-label="Trusted by brands">
+          <div className="trust-marquee__track trust-marquee__track--a" aria-hidden="true">
+            {trustWords.map((item) => (
+              <span key={`a-${item}`} className="trust-marquee__item">
+                {item}
+              </span>
+            ))}
+          </div>
+          <div className="trust-marquee__track trust-marquee__track--b" aria-hidden="true">
+            {trustWords.map((item) => (
+              <span key={`b-${item}`} className="trust-marquee__item">
+                {item}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 

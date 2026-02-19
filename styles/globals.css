@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@config "../tailwind.config.ts";
+@import "tailwindcss";
 
 :root {
   color-scheme: dark;
@@ -12,7 +11,10 @@ body {
 }
 
 body {
-  @apply text-white antialiased overflow-x-hidden;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
   min-height: 100dvh;
   background: #030712;
 }

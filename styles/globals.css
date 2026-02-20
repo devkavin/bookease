@@ -106,36 +106,22 @@ body {
 }
 
 .trust-marquee__rail {
-  display: flex;
   min-height: 2.2rem;
-}
-
-.trust-marquee__track {
-  display: flex;
-  gap: 1rem;
-  width: max-content;
-  will-change: transform;
-  animation: marquee-loop 24s linear infinite;
+  overflow: hidden;
 }
 
 .trust-marquee__item {
+  display: inline-flex;
+  align-items: center;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.03);
   color: rgba(255, 250, 240, 0.82);
   border-radius: 9999px;
   padding: 0.45rem 0.9rem;
+  margin-right: 1rem;
   font-size: 0.8rem;
   letter-spacing: 0.04em;
   white-space: nowrap;
-}
-
-@keyframes marquee-loop {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
 }
 
 @keyframes drift-a {
@@ -166,8 +152,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-background__layer,
-  .trust-marquee__track {
+  .app-background__layer {
     animation: none;
   }
 }

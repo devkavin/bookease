@@ -79,6 +79,65 @@ body {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='4' cy='6' r='1'/%3E%3Ccircle cx='58' cy='22' r='1'/%3E%3Ccircle cx='101' cy='119' r='1'/%3E%3Ccircle cx='139' cy='71' r='1'/%3E%3C/g%3E%3C/svg%3E");
 }
 
+.trust-marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.trust-marquee::before,
+.trust-marquee::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3.5rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.trust-marquee::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(5, 3, 10, 0.92), rgba(5, 3, 10, 0));
+}
+
+.trust-marquee::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(5, 3, 10, 0.92), rgba(5, 3, 10, 0));
+}
+
+.trust-marquee__rail {
+  display: flex;
+  min-height: 2.2rem;
+}
+
+.trust-marquee__track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  will-change: transform;
+  animation: marquee-loop 24s linear infinite;
+}
+
+.trust-marquee__item {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 250, 240, 0.82);
+  border-radius: 9999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@keyframes marquee-loop {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
 @keyframes drift-a {
   0% {
     transform: translate3d(-3%, -2%, 0) scale(1);
@@ -107,7 +166,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .app-background__layer {
+  .app-background__layer,
+  .trust-marquee__track {
     animation: none;
   }
 }

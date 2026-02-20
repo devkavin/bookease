@@ -1,0 +1,191 @@
+@config "../tailwind.config.ts";
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  min-height: 100dvh;
+  background-color: #05030a;
+  background-image: linear-gradient(150deg, #05030a 0%, #120a1f 45%, #07040d 100%);
+  background-attachment: fixed;
+}
+
+.app-background {
+  position: fixed;
+  inset: -40%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 14% 12%, rgba(251, 191, 36, 0.22), transparent 36%),
+    radial-gradient(circle at 86% 14%, rgba(192, 132, 252, 0.2), transparent 32%),
+    radial-gradient(circle at 52% 78%, rgba(244, 114, 182, 0.14), transparent 38%),
+    linear-gradient(150deg, #05030a 0%, #120a1f 46%, #07040d 100%);
+  transform: translate3d(0, 0, 0);
+}
+
+.app-background__layer {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(100px);
+  will-change: transform;
+  opacity: 0.68;
+}
+
+.app-background__layer--one {
+  width: 54rem;
+  height: 54rem;
+  left: -12%;
+  top: -10%;
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.26) 0%, rgba(251, 191, 36, 0) 70%);
+  animation: drift-a 34s ease-in-out infinite alternate;
+}
+
+.app-background__layer--two {
+  width: 50rem;
+  height: 50rem;
+  right: -10%;
+  top: 6%;
+  background: radial-gradient(circle, rgba(192, 132, 252, 0.24) 0%, rgba(192, 132, 252, 0) 70%);
+  animation: drift-b 42s ease-in-out infinite alternate;
+}
+
+.app-background__layer--three {
+  width: 64rem;
+  height: 64rem;
+  left: 14%;
+  bottom: -30%;
+  background: radial-gradient(circle, rgba(244, 114, 182, 0.16) 0%, rgba(244, 114, 182, 0) 72%);
+  animation: drift-c 52s ease-in-out infinite alternate;
+}
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='4' cy='6' r='1'/%3E%3Ccircle cx='58' cy='22' r='1'/%3E%3Ccircle cx='101' cy='119' r='1'/%3E%3Ccircle cx='139' cy='71' r='1'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.trust-marquee {
+  overflow: hidden;
+  position: relative;
+}
+
+.trust-marquee::before,
+.trust-marquee::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3.5rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.trust-marquee::before {
+  left: 0;
+  background: linear-gradient(to right, rgba(5, 3, 10, 0.92), rgba(5, 3, 10, 0));
+}
+
+.trust-marquee::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(5, 3, 10, 0.92), rgba(5, 3, 10, 0));
+}
+
+.trust-marquee__rail {
+  position: relative;
+  min-height: 2.2rem;
+}
+
+.trust-marquee__track {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  will-change: transform;
+}
+
+.trust-marquee__track--a {
+  animation: marquee-a 24s linear infinite;
+}
+
+.trust-marquee__track--b {
+  animation: marquee-b 24s linear infinite;
+}
+
+.trust-marquee__item {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 250, 240, 0.82);
+  border-radius: 9999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@keyframes marquee-a {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+@keyframes marquee-b {
+  from {
+    transform: translate3d(100%, 0, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes drift-a {
+  0% {
+    transform: translate3d(-3%, -2%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(8%, 7%, 0) scale(1.08);
+  }
+}
+
+@keyframes drift-b {
+  0% {
+    transform: translate3d(5%, -4%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(-9%, 10%, 0) scale(1.06);
+  }
+}
+
+@keyframes drift-c {
+  0% {
+    transform: translate3d(-6%, 4%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(8%, -7%, 0) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-background__layer,
+  .trust-marquee__track {
+    animation: none;
+  }
+}

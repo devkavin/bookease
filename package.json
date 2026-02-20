@@ -25,6 +25,8 @@
     "currency-codes": "^2.2.0",
     "date-fns": "latest",
     "date-fns-tz": "latest",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-react": "^8.6.0",
     "framer-motion": "latest",
     "ics": "latest",
     "lucide-react": "^0.575.0",

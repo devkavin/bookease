@@ -3,7 +3,6 @@ import { Section } from '@/components/app/Section';
 import { PricingCards } from '@/components/app/PricingCards';
 import { GlassCard } from '@/components/app/GlassCard';
 import { FadeIn } from '@/components/app/FadeIn';
-import { TrustedBrandsCarousel } from '@/components/app/TrustedBrandsCarousel';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CalendarCheck2, Crown, Hotel, Sparkles, Users } from 'lucide-react';
@@ -30,6 +29,9 @@ const featureCards = [
     icon: Users,
   },
 ];
+
+const trustWords = ['Aurora Suites', 'Citrine Spa', 'Grand Coast Villas', 'Velvet Stay', 'Élan Retreat', 'North Pier Hotel'];
+const trustWordsLoop = [...trustWords, ...trustWords];
 
 export default function MarketingPage() {
   return (
@@ -79,7 +81,17 @@ export default function MarketingPage() {
         </div>
       </FadeIn>
 
-      <TrustedBrandsCarousel />
+      <section className="trust-marquee mt-2 border-y border-white/10 py-4">
+        <div className="trust-marquee__rail" aria-label="Trusted by brands">
+          <div className="trust-marquee__track" aria-hidden="true">
+            {trustWordsLoop.map((item, index) => (
+              <span key={`${item}-${index}`} className="trust-marquee__item">
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <Section title="Everything your booking journey needs">
         <div className="grid gap-4 md:grid-cols-2">
